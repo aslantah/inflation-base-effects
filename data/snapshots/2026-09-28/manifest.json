@@ -1,0 +1,43 @@
+{
+  "coverage": {
+    "cpi.csv": {
+      "first": "1990-01-01",
+      "last": "2026-08-01",
+      "rows": 439
+    },
+    "michigan.csv": {
+      "first": "1990-02-01",
+      "last": "2026-08-01",
+      "rows": 439
+    },
+    "spf.csv": {
+      "first": "1990-08-01",
+      "last": "2026-08-01",
+      "rows": 146
+    },
+    "yields.csv": {
+      "first": "1990-01-01",
+      "last": "2026-08-01",
+      "rows": 440
+    }
+  },
+  "fetched_at_utc": "2026-09-29T00:59:49.944727+00:00",
+  "snapshot_date": "2026-09-28",
+  "sources": {
+    "fred_cpi": {
+      "B_CAN_BD": "CANCPALTT01IXNBM",
+      "B_EMU_BD": "DEUCPALTT01IXNBM",
+      "B_UKI_BD": "GBRCPALTT01IXNBM",
+      "B_USA_BD": "CPIAUCNS"
+    },
+    "fred_michigan": "MICH",
+    "fred_yields": {
+      "B_CAN_BD": "IRLTLT01CAM156N",
+      "B_EMU_BD": "IRLTLT01DEM156N",
+      "B_UKI_BD": "IRLTLT01GBM156N",
+      "B_USA_BD": "GS10"
+    },
+    "philadelphia_fed_spf": "https://www.philadelphiafed.org/-/media/frbp/assets/surveys-and-data/survey-of-professional-forecasters/data-files/files/Median_CPI_Level.xlsx",
+    "philadelphia_fed_spf_dates": "https://www.philadelphiafed.org/-/media/frbp/assets/surveys-and-data/survey-of-professional-forecasters/spf-release-dates.txt"
+  }
+}
