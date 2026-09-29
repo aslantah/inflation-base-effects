@@ -15,9 +15,9 @@ reversing the signal or selecting a favorable specification after the fact.
 
 ## Headline evidence
 
-The primary strategy uses the raw NSA CPI print rolling out of the YoY window,
-a six-month EWM z-score, a one-month implementation lag, and a constrained
-duration-neutral optimizer.
+The primary strategy uses the raw not seasonally adjusted (NSA) CPI print
+rolling out of the YoY window, a six-month EWM z-score, a one-month
+implementation lag, and a constrained duration-neutral optimizer.
 
 | Specification | Sample | N | Ann. return | Ann. vol. | Return/vol | NW t | NW p |
 |---|---:|---:|---:|---:|---:|---:|---:|
