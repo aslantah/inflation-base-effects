@@ -81,7 +81,9 @@ def calc_signal_from_base_effect(
     """
     score = tscore(rolling_off, halflife=hl)
     score = score.clip(-2, 2)
-    score = score.resample("MS").last().shift(implag).dropna(how="all")
+    # Move calendar labels so the last available print is not silently lost
+    # when a reduced country's history ends before the available return panel.
+    score = score.resample("MS").last().shift(implag, freq="MS").dropna(how="all")
     score = score.loc[:last_return_date]
     return score
 
@@ -95,7 +97,7 @@ def calc_month_of_year_signal(
     """Construct a real-time seasonal robustness signal from NSA base effects."""
     score = expanding_month_of_year_zscore(rolling_off, min_history=min_history)
     score = score.clip(-2, 2)
-    score = score.resample("MS").last().shift(implag).dropna(how="all")
+    score = score.resample("MS").last().shift(implag, freq="MS").dropna(how="all")
     return score.loc[:last_return_date]
 
 
@@ -127,6 +129,6 @@ def calc_signal(
     sig = cpi_mom_sa.shift(shiftval, freq="MS")
     score = tscore(sig, halflife=hl)
     score = score.clip(-2, 2)
-    score = score.resample("MS").last().shift(implag).dropna(how="all")
+    score = score.resample("MS").last().shift(implag, freq="MS").dropna(how="all")
     score = score.loc[:last_return_date]
     return score

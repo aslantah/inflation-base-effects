@@ -1,0 +1,13 @@
+{
+  "retrieved_utc": "2026-10-01T18:46:12.624622+00:00",
+  "sources": {
+    "GS10": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=GS10&cosd=1990-01-01&coed=2026-10-01",
+    "DGS10": "https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS10&cosd=1990-01-01&coed=2026-10-01"
+  },
+  "units": "percent per annum",
+  "vintage": "current vintage at retrieval, not historical vintages",
+  "sha256": {
+    "GS10.csv": "8d97ff353e5204a4ff423255cf7ed7ec7abbb7c007ccb9b1db4a1dceee922906",
+    "DGS10.csv": "b5a7f8557a80b18ba4d7b40125a285153dec3be4256a6f3ce0f1a1eac031b041"
+  }
+}

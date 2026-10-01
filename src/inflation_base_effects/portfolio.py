@@ -24,9 +24,17 @@ def mod_duration(y_pct: float, maturity: int = 10) -> float:
     Uses the closed-form: D_mod = (1/y) [1 - (1 + y/2)^(-2T)]
     """
     y = y_pct / 100
-    if pd.isna(y) or y <= 0.001:
+    if maturity <= 0:
+        raise ValueError("maturity must be positive")
+    if pd.isna(y):
+        return float("nan")
+    if not np.isfinite(y) or y <= -2:
+        raise ValueError("yield must be finite and greater than -200 percent")
+    if y == 0:
         return float(maturity)
-    return (1.0 / y) * (1.0 - (1.0 + y / 2.0) ** (-2 * maturity))
+    # Stable at zero and continuous for negative yields; the zero limit is T.
+    # A negative-coupon par bond is an algebraic proxy, not a tradable instrument.
+    return float(-np.expm1(-2 * maturity * np.log1p(y / 2)) / y)
 
 
 def compute_bond_returns(yields_monthly: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:

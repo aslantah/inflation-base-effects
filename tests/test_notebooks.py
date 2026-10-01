@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+import nbformat
+
 
 def test_saved_notebooks_are_cleanly_executed():
     for path in sorted(Path("notebooks").glob("*.ipynb")):
@@ -18,6 +20,22 @@ def test_saved_notebooks_are_cleanly_executed():
             if output.get("output_type") == "error"
         ]
         assert not errors
+
+
+def test_research_notebook_schema_and_required_illustration():
+    paths = sorted(Path("notebooks").glob("*.ipynb"))
+    assert len(paths) == 3
+    for path in paths:
+        notebook = nbformat.read(path, as_version=4)
+        nbformat.validate(notebook)
+        assert len({cell.id for cell in notebook.cells}) == len(notebook.cells)
+    first = nbformat.read(paths[0], as_version=4)
+    mechanical = next(
+        cell
+        for cell in first.cells
+        if cell.cell_type == "code" and "fig, axes = plot_mechanical_effect()" in cell.source
+    )
+    assert any("image/png" in output.get("data", {}) for output in mechanical.outputs)
 
 
 def test_notebooks_do_not_modify_import_paths():
