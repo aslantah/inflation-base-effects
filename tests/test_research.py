@@ -14,7 +14,9 @@ from inflation_base_effects.research import (
     benchmark_regression,
     comparison_table,
     constraint_summary,
+    evaluation_conventions,
     leave_one_out,
+    legacy_evaluation_comparison,
     mechanical_example,
     mechanism_regression,
     performance_summary,
@@ -40,6 +42,10 @@ def test_mechanical_departure_and_offset():
     assert offset.loc[0, "yoy_pct"] == pytest.approx(1)
     assert offset.loc[0, "change_yoy_pp"] == pytest.approx(0)
     assert offset.loc[12, "change_yoy_pp"] == pytest.approx(-1)
+
+
+def test_evaluation_conventions_alias_preserves_interface():
+    assert evaluation_conventions is legacy_evaluation_comparison
 
 
 def test_duration_continuity_and_domain():

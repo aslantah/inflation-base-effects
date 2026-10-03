@@ -1,189 +1,174 @@
 # Can Inflation Base Effects Predict Sovereign Bond Returns?
 
-## A cross-country falsification study
+I test whether a signal based on last year's CPI prints predicts sovereign
+bond returns in the US, Germany, the UK, and Canada.
+A large price increase leaving the annual comparison puts downward pressure on
+reported inflation. If bond investors underreact to that predictable component,
+it could create an opportunity to buy duration ahead of the adjustment.
 
-When a large CPI print from 12 months ago drops out of the year-over-year
-calculation, reported inflation mechanically falls. This project asks whether
-that predictable arithmetic is nevertheless under-priced by sovereign bond
-markets.
+I find little evidence of that opportunity. The primary duration-neutral
+portfolio earns approximately -0.08% per year before costs, with a 95% confidence
+interval of -0.92% to +0.77%. Tests using US inflation-expectations surveys also
+provide little support for the proposed expectations channel.
 
-**Result:** the inherited primary signal does not demonstrate positive bond alpha in
-this public-data implementation. The null result is retained rather than
-reversing the signal or selecting a favorable specification after the fact.
+## Results
 
-This is a test of three distinct claims: inflation arithmetic, expectations
-adjustment, and bond-return predictability. Only the first is an identity. The
-project is not preregistered, and a non-significant result is not proof of zero effect.
+I compare an optimizer-based portfolio with a seasonal signal variant and an
+optimizer-free rank/DV01 portfolio. Returns are synthetic bond-return estimates
+constructed from yields. Annual return is the annualized arithmetic mean;
+return/volatility is the ratio of that mean to annualized volatility.
 
-## Start with the mechanism
-
-![A one-time price increase enters and leaves the annual inflation window](docs/figures/mechanical_base_effect.png)
-
-Prices can remain elevated while annual inflation falls. The timing bars show
-the **mechanical change in YoY inflation**, not an estimated lead–lag relationship.
-A new price increase can offset the old increase leaving the window.
-
-## Research notebooks
-
-| Notebook | What to look for |
-|---|---|
-| [1. Economic mechanism and data](notebooks/01_data_and_mechanism.ipynb) | Inflation identity, timing illustration, data exploration, forecast-target alignment, US survey evidence |
-| [2. Portfolio experiment](notebooks/02_signal_and_backtest.ipynb) | Common-date comparisons, construction, attribution, costs, benchmark adjustment, leave-one-country-out re-estimation, stability |
-| [3. Robustness and reconstruction](notebooks/03_robustness_and_reconstruction.ipynb) | Declared sensitivity grids, duration correction, US yield sampling, and a qualified reconciliation with the recovered study |
-
-Notebooks include executed outputs. The primary design stays fixed; the appendix
-reports all declared variants without selecting a winner.
-
-![Cumulative value added across the primary and robustness specifications](docs/figures/strategy_summary.png)
-
-## Headline evidence
-
-The primary strategy uses the raw not seasonally adjusted (NSA) CPI print
-rolling out of the YoY window, a six-month EWM z-score, a one-month
-implementation lag, and a constrained duration-neutral optimizer.
-
-| Specification | Sample | N | Ann. return | Ann. vol. | Return/vol | NW t | NW p |
-|---|---:|---:|---:|---:|---:|---:|---:|
+| Specification | Sample | Months | Ann. return | Ann. vol. | Return/vol | NW t | NW p |
+|---|---|---:|---:|---:|---:|---:|---:|
 | Primary NSA/EWM optimizer | 1991-09 to 2024-12 | 400 | -0.08% | 2.75% | -0.03 | -0.18 | 0.861 |
 | Expanding month-of-year optimizer | 1996-04 to 2024-12 | 345 | 0.54% | 2.84% | 0.19 | 1.18 | 0.237 |
-| Primary signal, rank/DV01 implementation | 1991-09 to 2024-12 | 400 | -0.02% | 1.42% | -0.01 | -0.09 | 0.928 |
+| Primary signal, rank/DV01 portfolio | 1991-09 to 2024-12 | 400 | -0.02% | 1.42% | -0.01 | -0.09 | 0.928 |
 
-The seasonal robustness variant is mildly positive but statistically
-insignificant. It is reported as a diagnostic, not promoted to a replacement
-model. The optimizer-free rank/DV01 portfolio is also indistinguishable from
-zero.
+The seasonal signal needs a longer warm-up. On the common April 1996–December
+2024 sample, the primary mean is approximately -0.01% per year, the seasonal
+mean is +0.54%, and the rank/DV01 mean is -0.03%. None differs significantly
+from zero under Newey-West inference. The notebooks report both sample
+conventions, confidence intervals, drawdowns, and turnover.
 
-These are full-history estimates, not identical-date comparisons. On the common
-1996-04–2024-12 sample (345 months), the primary mean is approximately **-0.01%**
-and the rank/DV01 mean **-0.03%** per year. The primary full-history 95% HAC interval
-is approximately **[-0.92%, +0.77%]** per year: the estimate is economically imprecise.
-The notebook reports drawdowns, turnover, and uncertainty for both sample conventions.
+![Cumulative value added on common dates](docs/figures/strategy_summary.png)
 
-The proposed expectations mechanism is unsupported as well:
+The US survey regressions estimate how forecast revisions relate to the negative
+of the CPI print leaving the annual window. My hypothesis implies a positive
+coefficient: downward mechanical pressure on inflation should accompany downward
+forecast revisions.
 
-| Forecast revision proxy | N | Coefficient | HAC t | p-value | R² |
+| Forecast revision proxy | Observations | Coefficient | HAC t | p-value | R² |
 |---|---:|---:|---:|---:|---:|
 | Michigan monthly revision | 426 | -0.0736 | -1.27 | 0.203 | 0.0050 |
 | SPF same-target revision | 143 | -0.0301 | -0.63 | 0.528 | 0.0032 |
 
-The hypothesis requires positive mechanism coefficients under the project's
-sign convention. Both estimates have the opposite sign, wide confidence
-intervals, and negligible explanatory power.
+Both estimates are negative, imprecise, and explain less than 1% of revision
+variation. These proxies provide little evidence for the expectations channel;
+they cover US respondents and cannot establish how investors in all four bond
+markets form expectations.
 
-## Research design
+## Economic mechanism and method
 
-### Signal timing
+Prices can remain high while annual inflation falls. In the example below, a
+one-time price increase from 100 to 101 produces 1% annual inflation for twelve
+months. Annual inflation then falls to zero while the price level stays at 101.
+An equal proportional increase a year later offsets the departing increase.
 
-1. Compute monthly log inflation from NSA CPI price levels.
-2. Shift it 12 months to identify the print rolling out of the YoY window.
-3. Apply the pre-specified six-month EWM z-score and cap at ±2.
-4. Delay implementation by one month.
-5. Form holdings at month `t` and earn the complete-case return at `t+1`.
+![Price levels, annual inflation, and the mechanical entry and exit of a CPI increase](docs/figures/mechanical_base_effect.png)
 
-The first month without prior holdings is excluded rather than silently
-recorded as a zero return.
+The timing bars show changes in annual inflation in percentage points. I use
+this accounting identity to motivate the signal, then test expectations and
+returns separately.
 
-### Core robustness checks
+I calculate monthly log inflation from not seasonally adjusted (NSA) CPI levels
+and identify the print leaving the twelve-month window. I standardize it with
+a six-month exponentially weighted mean and standard deviation, cap the score
+at ±2, and apply a one-month implementation delay. Holdings formed in month
+`t` earn returns in `t+1`; months without the required holdings or returns are
+excluded.
 
-- **Real-time seasonal normalization:** each calendar month is standardized
-  using only prior observations from that same month, with a five-observation
-  warm-up.
-- **Optimizer-free benchmark:** the top two signals are long and the bottom two
-  short; inverse-duration notionals produce unit gross exposure and exact DV01
-  neutrality.
-- **HAC inference:** Newey-West standard errors are reported for the strategy
-  mean and mechanism regressions.
-- **Costs and stability:** the notebook reports fixed-basis-point transaction
-  cost scenarios, formal pre/post-2010 HAC tests, and trailing 10-year estimates.
-- **Attribution and concentration:** country and carry/yield-change contributions
-  reconcile to portfolio P&L; reduced-country portfolios are re-optimized, not
-  obtained by subtracting an existing contribution.
-- **Incremental value:** an equal-weight long-only bond-proxy benchmark, HAC
-  intercept regression, and fixed 50/50 combination separate correlation from alpha.
-- **Declared sensitivities:** smoothing, assumed IC, implementation delay,
-  covariance estimation, and HAC lags are varied one at a time on common dates.
+The optimizer balances expected return against a blend of 12- and 36-month
+covariance estimates. I constrain duration exposure to zero, gross exposure to
+2, each position to ±0.5, and annual forecast volatility to at most 10%. The
+assumed information coefficient of 0.05 determines sizing. I assess its influence
+alongside signal smoothing, implementation delay, covariance half-lives, and
+Newey-West lag length.
 
-![Country and carry versus yield-change contributions](docs/figures/portfolio_attribution.png)
+The seasonal comparison standardizes each calendar month using only earlier
+observations from that same month, with a five-observation warm-up. The rank
+portfolio buys the top two signals and sells the bottom two, with inverse-duration
+weights, unit gross exposure, and zero net DV01.
 
-The UK contributes positively and the US negatively in the original four-country
-portfolio. This attribution does not justify ex-post country selection. Positions
-are cap-dominated; with four 0.5 position limits, the gross cap of 2 is redundant.
-The 10% volatility ceiling is a limit, not a risk target. Duration neutrality is
-not currency, funding, or country-factor neutrality.
+## Portfolio behaviour and interpretation
 
-## Did the signal decay after being priced in?
+The UK contributes positively and the US negatively to the four-country portfolio.
+I separate country contributions, carry, and yield-change returns, then
+re-estimate portfolios excluding each country to assess concentration. Those
+re-estimated portfolios retain the same signal and constraints.
 
-The data do not support that account. The 2010 split was already present in the
-study and is retained as a fixed stability diagnostic rather than selected from
-the returns. It is not claimed to be a publication or market-adoption date.
+![Country contributions and carry versus yield-change attribution](docs/figures/portfolio_attribution.png)
 
-| Implementation and period | N | Ann. return | Ann. vol. | Return/vol | NW t | NW p |
-|---|---:|---:|---:|---:|---:|---:|
-| Optimizer, pre-2010 | 220 | -0.30% | 2.80% | -0.11 | -0.52 | 0.604 |
-| Optimizer, 2010 onward | 180 | 0.20% | 2.70% | 0.08 | 0.30 | 0.765 |
-| Rank/DV01, pre-2010 | 220 | -0.13% | 1.45% | -0.09 | -0.43 | 0.670 |
-| Rank/DV01, 2010 onward | 180 | 0.11% | 1.38% | 0.08 | 0.31 | 0.755 |
+Position limits bind in almost every formation month. With four assets capped
+at 0.5, the gross limit of 2 is already implied by the position limits. The
+volatility ceiling never binds. Average monthly turnover is close to two units
+of notional, so a 1 bp one-way charge costs approximately 0.24 percentage points
+per year.
 
-The annualized post-minus-pre change is **+0.51%** for the optimizer
-(`t = 0.59`, `p = 0.558`) and **+0.25%** for the rank/DV01 portfolio
-(`t = 0.52`, `p = 0.601`). Both changes are positive and statistically
-insignificant. The evidence therefore indicates neither historical positive
-alpha nor subsequent decay.
+The strategy has little correlation with an equal-weight long-only bond-proxy
+benchmark, but its benchmark-adjusted intercept is imprecise. A fixed 50/50
+combination does not improve the benchmark's return/volatility ratio.
 
-![Trailing 10-year return estimates and Newey-West confidence intervals](docs/figures/temporal_stability.png)
+### Temporal stability
 
-The rolling windows overlap and are descriptive. They show how imprecisely
-performance varies through time, but they are not independent tests and cannot
-identify when investors may have learned the signal.
+I compare performance before and after January 2010 and estimate trailing
+ten-year means. The annualized post-minus-pre change is +0.51% for the optimizer
+(`t = 0.59`, `p = 0.558`) and +0.25% for the rank portfolio
+(`t = 0.52`, `p = 0.601`). Neither change is statistically significant.
 
-## Data and reproducibility
+![Trailing ten-year means and Newey-West confidence intervals](docs/figures/temporal_stability.png)
 
-The showcased run uses the committed snapshot in
-`data/snapshots/2026-09-28/`. Its manifest records source identifiers, coverage,
-retrieval time, and SHA-256 checksums. This makes the saved result reproducible
-without a FRED key or dependence on future source revisions.
+The 2010 split is a descriptive sample division. It identifies neither a market
+adoption date nor a causal change in investor behaviour. The rolling windows
+overlap, and the study has no untouched holdout sample. I treat the specification
+comparisons as exploratory; their p-values are not adjusted for multiple testing.
 
-The supplementary `data/supplementary/2026-10-01/` snapshot freezes public
-GS10/DGS10 observations with separate provenance and SHA-256 checksums. It is used
-only for the US yield-sampling diagnostic, never to overwrite primary inputs.
+### Measurement limits
 
-### Reconstruction and verified corrections
+The primary confidence interval includes both losses and gains of economic
+interest. I cannot establish positive predictive performance from these results,
+and I cannot rule out an effect that the available data measure imprecisely.
 
-The appendix records the original scanned result (approximately -0.60% annually),
-the preceding public implementation (approximately -0.08%), and controlled
-comparisons. The original downloaded vintage is unavailable, so this is **not an
-exact replication bridge** and changes are not claimed to sum to the historical gap.
+- Returns use `carry - duration × yield change`. They omit convexity, instrument
+  cash flows, financing, and FX hedges. Cumulative value added is additive P&L per
+  unit of reference notional.
+- Monthly-average yields do not represent executable month-end prices or
+  announcement-day returns. Substituting US month-end yields produces about
+  -0.45% annual portfolio return in the sampling check; the other countries still
+  use monthly averages.
+- Duration neutrality offsets a common parallel yield movement in the proxy
+  units. Country-specific rate movements, currency exposure, and funding remain.
+- Current-vintage data may differ from information available to investors at
+  each historical date. Michigan expectations also change target horizon
+  between surveys; the SPF comparison holds the target quarter fixed.
 
-The low/negative-yield duration shortcut has been replaced by a continuous,
-numerically stable formula. A same-input legacy-rule run reproduces the preceding
-public result and isolates the small correction; the research conclusion is unchanged.
-Implementation delays now move calendar labels, preserving the last eligible
-print for shorter country histories without changing the primary sample.
+## Notebooks
 
-Monthly averages versus month-end yields matter: replacing only US yields with
-month-end observations yields about -0.45% annually in a mixed-sampling diagnostic.
-This does not establish causality for the original result gap or make the full
-cross-country proxy executable. Historical vintage reconstruction remains deferred.
+| Notebook | Contents |
+|---|---|
+| [1. Economic mechanism and data](notebooks/01_data_and_mechanism.ipynb) | Inflation arithmetic, data coverage, timing, and US expectations tests |
+| [2. Portfolio experiment](notebooks/02_signal_and_backtest.ipynb) | Construction, performance, attribution, country exclusions, benchmarks, costs, and stability |
+| [3. Sensitivity and measurement](notebooks/03_sensitivity_and_measurement.ipynb) | Duration, return accounting, US yield sampling, parameter sensitivity, and inference |
+
+Each notebook includes executed tables and figures. Calculations shared across
+the notebooks live in `src/inflation_base_effects/`; tests cover timing, data
+integrity, constraints, attribution, and statistical helpers.
+
+## Data and reproduction
 
 | Dataset | Source | Frequency |
 |---|---|---|
-| CPI price levels, NSA | FRED / OECD | Monthly |
-| 10Y government bond yields | FRED / OECD | Monthly averages |
+| NSA CPI price levels | FRED / OECD | Monthly |
+| 10-year government yields | FRED / OECD | Monthly averages |
 | Inflation expectations | University of Michigan via FRED | Monthly |
-| CPI forecast revisions | Philadelphia Fed SPF | Quarterly |
+| CPI forecasts | Philadelphia Fed SPF | Quarterly |
 
-The US yield series is monthly [`GS10`](https://fred.stlouisfed.org/series/GS10),
-an average of business-day observations, rather than a month-end resampling of
-daily `DGS10`. SPF revisions use official
-[deadline and release-date documentation](https://www.philadelphiafed.org/-/media/frbp/assets/surveys-and-data/survey-of-professional-forecasters/spf-documentation.pdf).
+I use the frozen inputs in `data/snapshots/2026-09-28/`. The manifest records
+source identifiers, coverage, and retrieval time; a checksum file verifies the
+saved data. Separate GS10/DGS10 inputs in `data/supplementary/2026-10-01/` support
+the US sampling comparison and have their own provenance and checksums.
 
-The common-country signal ends in 2024-12 because the referenced OECD CPI
-series for Germany, the UK, and Canada end in 2023-11; those observations can
-identify prints rolling off through the following 12 months.
+The US monthly yield series is [GS10](https://fred.stlouisfed.org/series/GS10),
+an average of business-day observations. I use
+[DGS10](https://fred.stlouisfed.org/series/DGS10) for month-end sampling.
+SPF revisions use the official survey deadlines and forecast definitions in the
+[SPF documentation](https://www.philadelphiafed.org/-/media/frbp/assets/surveys-and-data/survey-of-professional-forecasters/spf-documentation.pdf).
 
-## Reproduce the study
+The common-country signal ends in December 2024. The referenced OECD CPI series
+for Germany, the UK, and Canada end in November 2023; their last prints enter
+the rolling-off signal twelve months later, followed by the implementation delay.
 
-Python 3.10 and [`uv`](https://docs.astral.sh/uv/) are required.
+Python 3.10 and [uv](https://docs.astral.sh/uv/) are required. Executing the
+notebooks uses the saved inputs and needs no API key.
 
 ```bash
 uv sync --locked --all-extras
@@ -192,73 +177,18 @@ uv run jupyter nbconvert --to notebook --execute --inplace \
   --ExecutePreprocessor.timeout=1800 \
   notebooks/01_data_and_mechanism.ipynb \
   notebooks/02_signal_and_backtest.ipynb \
-  notebooks/03_robustness_and_reconstruction.ipynb
+  notebooks/03_sensitivity_and_measurement.ipynb
 ```
 
-To create a new dated snapshot from the official sources:
+To retrieve another dated snapshot, copy `.env.example` to `.env`, add a FRED
+API key, and run `uv run python scripts/refresh_data.py --date YYYY-MM-DD`.
+The US yield download uses `uv run python scripts/freeze_us_yields.py --date YYYY-MM-DD`
+and needs no key. Downloads require an unused destination directory;
+the notebooks keep their explicit snapshot dates. HTTPS certificate verification
+remains enabled, with `SSL_CERT_FILE` available for a custom CA bundle.
 
-```bash
-cp .env.example .env
-# Add a free FRED_API_KEY to .env
-uv run python scripts/refresh_data.py --date YYYY-MM-DD
-```
-
-Refreshes never overwrite an existing non-empty snapshot. HTTPS certificate
-verification remains enabled; corporate CA bundles can be supplied through
-`SSL_CERT_FILE`.
-
-The separate public-yield snapshot can be refreshed to a **new** dated directory
-with `uv run python scripts/freeze_us_yields.py --date YYYY-MM-DD` (no API key).
-Notebooks deliberately keep their documented snapshot dates until explicitly revised.
-CI runs formatting, lint, tests, all three frozen-data notebooks, and package build.
-
-## Repository structure
-
-```text
-.
-├── data/snapshots/2026-09-28/   # Frozen public-data inputs and manifest
-├── data/supplementary/2026-10-01/ # Separate US yield sampling inputs
-├── docs/figures/                 # README research figure
-├── notebooks/
-│   ├── 01_data_and_mechanism.ipynb
-│   ├── 02_signal_and_backtest.ipynb
-│   └── 03_robustness_and_reconstruction.ipynb
-├── scripts/refresh_data.py       # Explicit, non-overwriting live refresh
-├── src/inflation_base_effects/
-│   ├── data.py
-│   ├── signals.py
-│   ├── portfolio.py
-│   ├── evaluation.py
-│   └── research.py
-└── tests/                        # Timing, data, constraints, and robustness
-```
-
-## Limitations
-
-- Returns are `carry - duration × yield change` approximations, not futures or
-  total-return indices.
-- Monthly-average yields cannot identify announcement-day market adjustment.
-- Proxy returns omit convexity, actual instrument cash flows, funding, and FX hedges.
-  Additive value added is reference-notional P&L, not a funded reinvested wealth index.
-- Current-vintage CPI histories may differ from the real-time values available
-  to investors.
-- The four-country optimizer remains position-cap dominated.
-- Michigan expectations change forecast horizon; SPF evidence is US-only.
-- Transaction costs are illustrative fixed-basis-point scenarios.
-- A positive robustness point estimate is not an untouched discovery sample.
-- The 2010 split is a fixed diagnostic rather than a causal market-adoption
-  date; overlapping rolling windows are descriptive.
-
-## What the project demonstrates
-
-- translating an economic mechanism into an explicitly timed signal;
-- separating a pre-specified test from post-hoc diagnostics;
-- constrained portfolio construction and an optimizer-free benchmark;
-- complete-case return accounting, HAC inference, mechanism tests, and a
-  disciplined temporal-stability analysis;
-- reproducible research with frozen inputs, tested code, and honest reporting
-  of a failed hypothesis.
+CI checks formatting, lint, tests, notebook execution, and package build.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).

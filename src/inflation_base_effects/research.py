@@ -294,11 +294,11 @@ def sensitivity_experiments(
     return groups
 
 
-def legacy_evaluation_comparison(holdings: pd.DataFrame, yields: pd.DataFrame):
+def evaluation_conventions(holdings: pd.DataFrame, yields: pd.DataFrame):
     """Isolate evaluation conventions with identical already-formed holdings.
 
-    These are diagnostics, not an exact historical reconstruction. The
-    contemporaneous row is explicitly noncausal and never used as a strategy.
+    The contemporaneous row is a noncausal accounting diagnostic. All cases
+    use the same holdings to isolate the effect of timing and missing data.
     """
     ret, _ = compute_bond_returns(yields)
     h, r = univ_align(holdings, ret)
@@ -307,3 +307,6 @@ def legacy_evaluation_comparison(holdings: pd.DataFrame, yields: pd.DataFrame):
         "Prior holdings, missing contributions zero": (h.shift(1) * r).sum(axis=1),
         "Contemporaneous holdings (NONCAUSAL)": (h * r).sum(axis=1),
     }
+
+
+legacy_evaluation_comparison = evaluation_conventions
